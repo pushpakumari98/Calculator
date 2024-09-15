@@ -3,485 +3,233 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class CalculatorApplication implements ActionListener {
+public class BasicCalculatorGUI extends JFrame implements ActionListener {
 
-    double num1 = 0, num2 = 0, result = 0;
-    int calculation;
-    JFrame frame = new JFrame("Calculator");
-    JLabel label = new JLabel();
-    JTextField textField = new JTextField();
-    JRadioButton onRadioButton = new JRadioButton("on");
-    JRadioButton offRadioButton = new JRadioButton("off");
-    JButton buttonZero = new JButton("0");
-    JButton buttonOne = new JButton("1");
-    JButton buttonTwo = new JButton("2");
-    JButton buttonThree = new JButton("3");
-    JButton buttonFour = new JButton("4");
-    JButton buttonFive = new JButton("5");
-    JButton buttonSix = new JButton("6");
-    JButton buttonSeven = new JButton("7");
-    JButton buttonEight = new JButton("8");
-    JButton buttonNine = new JButton("9");
-    JButton buttonDot = new JButton(".");
-    JButton buttonClear = new JButton("Clr");
-    JButton buttonDelete = new JButton("Del");
-    JButton buttonEqual = new JButton("=");
-    JButton buttonMul = new JButton("x");
-    JButton buttonDiv = new JButton("/");
-    JButton buttonPlus = new JButton("+");
-    JButton buttonMinus = new JButton("-");
-    JButton buttonSquare = new JButton("x\u00B2");
-    JButton buttonReciprocal = new JButton("1/x");
-    JButton buttonSqrt = new JButton("\u221A");
+    // Components for the calculator
+    private JTextField display;
+    private JButton[] numberButtons;
+    private JButton addButton, subButton, mulButton, divButton;
+    private JButton sqrtButton, squareButton, reciprocalButton, clearButton, deleteButton, equalButton;
+    private JButton dotButton, percentButton, openParenthesisButton, closeParenthesisButton;
+    private JPanel panel;
 
-    // Theme related components
-    JRadioButton darkTheme = new JRadioButton("Dark");
-    JRadioButton lightTheme = new JRadioButton("Light");
-    ButtonGroup themeGroup = new ButtonGroup();
+    private double num1 = 0, num2 = 0;
+    private char operator;
+    private boolean dotUsed = false; // Track if the dot has been used
 
-    Color darkBackground = Color.black;
-    Color darkForeground = Color.white;
-    Color lightBackground = Color.white;
-    Color lightForeground = Color.black;
+    public BasicCalculatorGUI() {
+        // Frame properties
+        setTitle(" Calculator");
+        setSize(400, 600);  // Increased height to accommodate additional buttons
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(null);
+        getContentPane().setBackground(Color.decode("#000000"));  // Dark background
 
-    CalculatorApplication() {
-        prepareGui();
-        addComponents();
-        addActionEvent();
-        setTheme(darkTheme.isSelected()); // Start with dark theme
-    }
+        // Text field for the display
+        display = new JTextField();
+        display.setBounds(30, 40, 340, 50);
+        display.setEditable(false);
+        display.setBackground(Color.WHITE);
+        display.setFont(new Font("Arial", Font.BOLD, 30));
+        display.setHorizontalAlignment(SwingConstants.RIGHT);  // Align text to the right
+        display.setBorder(BorderFactory.createLineBorder(Color.RED, 1));
+        add(display);
 
-    public void prepareGui() {
-        frame.setSize(305, 550); // Adjusted height for theme settings
-        frame.getContentPane().setLayout(null);
-        frame.getContentPane().setBackground(darkBackground);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    }
+        // Creating buttons for numbers and operations
+        numberButtons = new JButton[10];
+        for (int i = 0; i < 10; i++) {
+            numberButtons[i] = new JButton(String.valueOf(i));
+            numberButtons[i].setFont(new Font("Arial", Font.BOLD, 20));
+            numberButtons[i].setBackground(Color.decode("#4CAF50"));  // Modern green for numbers
+            numberButtons[i].setForeground(Color.WHITE);
+            numberButtons[i].setFocusPainted(false);
+            numberButtons[i].setBorder(BorderFactory.createLineBorder(Color.decode("#FF5722")));
+            numberButtons[i].addActionListener(this);
+        }
 
-    public void addComponents() {
-        label.setBounds(250, 0, 50, 50);
-        label.setForeground(darkForeground);
-        frame.add(label);
+        // Operation buttons
+        addButton = new JButton("+");
+        subButton = new JButton("-");
+        mulButton = new JButton("*");
+        divButton = new JButton("/");
 
-        textField.setBounds(10, 40, 270, 40);
-        textField.setFont(new Font("Arial", Font.BOLD, 20));
-        textField.setEditable(false);
-        textField.setHorizontalAlignment(SwingConstants.RIGHT);
-        textField.setForeground(darkForeground); // Set text color
-        frame.add(textField);
+        squareButton = new JButton("x²");
+        sqrtButton = new JButton("√");
+        reciprocalButton = new JButton("1/x");
+        clearButton = new JButton("CLR");
+        deleteButton = new JButton("DEL");
+        equalButton = new JButton("=");
 
-        onRadioButton.setBounds(10, 95, 60, 40);
-        onRadioButton.setSelected(true);
-        onRadioButton.setFont(new Font("Arial", Font.BOLD, 14));
-        onRadioButton.setBackground(darkBackground);
-        onRadioButton.setForeground(darkForeground);
-        onRadioButton.setFocusable(false);
-        frame.add(onRadioButton);
+        dotButton = new JButton(".");
+        percentButton = new JButton("%");
+        openParenthesisButton = new JButton("(");
+        closeParenthesisButton = new JButton(")");
 
-        offRadioButton.setBounds(10, 120, 60, 40);
-        offRadioButton.setFont(new Font("Arial", Font.BOLD, 14));
-        offRadioButton.setBackground(darkBackground);
-        offRadioButton.setForeground(darkForeground);
-        offRadioButton.setFocusable(false);
-        frame.add(offRadioButton);
+        // Setting color and font for number buttons
+        JButton[] numberButtonsArray = {addButton, subButton, mulButton, divButton, deleteButton};
+        for (JButton button : numberButtonsArray) {
+            button.setFont(new Font("Arial", Font.BOLD, 20));
+            button.setBackground(Color.decode("#FFC107"));  // Yellow background
+            button.setForeground(Color.BLACK);  // Black text
+            button.setFocusPainted(false);
+            button.setBorder(BorderFactory.createLineBorder(Color.decode("#FFD54F")));
+            button.addActionListener(this);
+        }
 
-        ButtonGroup buttonGroup = new ButtonGroup();
-        buttonGroup.add(onRadioButton);
-        buttonGroup.add(offRadioButton);
+        // Setting color and font for other operation buttons
+        JButton[] otherOperatorButtons = {squareButton, sqrtButton, reciprocalButton, clearButton, equalButton, dotButton, percentButton, openParenthesisButton, closeParenthesisButton};
+        for (JButton button : otherOperatorButtons) {
+            button.setFont(new Font("Arial", Font.BOLD, 20));
+            button.setBackground(Color.decode("#FF5722"));  // Stylish orange for other operators
+            button.setForeground(Color.WHITE);
+            button.setFocusPainted(false);
+            button.setBorder(BorderFactory.createLineBorder(Color.decode("#E64A19")));
+            button.addActionListener(this);
+        }
 
-        // Theme settings
-        darkTheme.setBounds(10, 170, 80, 40);
-        darkTheme.setFont(new Font("Arial", Font.BOLD, 14));
-        darkTheme.setBackground(darkBackground);
-        darkTheme.setForeground(darkForeground);
-        darkTheme.setFocusable(false);
-        frame.add(darkTheme);
+        equalButton.setBackground(Color.decode("#FFC107"));  // Bright yellow for equal button
+        equalButton.setForeground(Color.BLACK);
 
-        lightTheme.setBounds(10, 200, 80, 40);
-        lightTheme.setFont(new Font("Arial", Font.BOLD, 14));
-        lightTheme.setBackground(darkBackground);
-        lightTheme.setForeground(darkForeground);
-        lightTheme.setFocusable(false);
-        frame.add(lightTheme);
+        // Panel for the buttons layout
+        panel = new JPanel();
+        panel.setBounds(30, 120, 340, 430);  // Increased height for additional buttons
+        panel.setLayout(new GridLayout(7, 4, 10, 10));
+        panel.setBackground(Color.decode("#000000"));  // Panel background
 
-        themeGroup.add(darkTheme);
-        themeGroup.add(lightTheme);
+        // Adding buttons to the panel
+        panel.add(numberButtons[1]);
+        panel.add(numberButtons[2]);
+        panel.add(numberButtons[3]);
+        panel.add(addButton);
+        panel.add(numberButtons[4]);
+        panel.add(numberButtons[5]);
+        panel.add(numberButtons[6]);
+        panel.add(subButton);
+        panel.add(numberButtons[7]);
+        panel.add(numberButtons[8]);
+        panel.add(numberButtons[9]);
+        panel.add(mulButton);
+        panel.add(dotButton);
+        panel.add(numberButtons[0]);
+        panel.add(percentButton);
+        panel.add(divButton);
+        panel.add(openParenthesisButton);
+        panel.add(closeParenthesisButton);
+        panel.add(clearButton);
+        panel.add(equalButton);
+        panel.add(sqrtButton);
+        panel.add(reciprocalButton);
+        panel.add(squareButton);
+        panel.add(deleteButton);
 
-        // Buttons - Rest of the code remains similar
-        buttonSeven.setBounds(10, 250, 60, 40);
-        buttonSeven.setFont(new Font("Arial", Font.BOLD, 20));
-        buttonSeven.setFocusable(false);
-        frame.add(buttonSeven);
-
-        buttonEight.setBounds(80, 250, 60, 40);
-        buttonEight.setFont(new Font("Arial", Font.BOLD, 20));
-        buttonEight.setFocusable(false);
-        frame.add(buttonEight);
-
-        buttonNine.setBounds(150, 250, 60, 40);
-        buttonNine.setFont(new Font("Arial", Font.BOLD, 20));
-        buttonNine.setFocusable(false);
-        frame.add(buttonNine);
-
-        buttonFour.setBounds(10, 310, 60, 40);
-        buttonFour.setFont(new Font("Arial", Font.BOLD, 20));
-        buttonFour.setFocusable(false);
-        frame.add(buttonFour);
-
-        buttonFive.setBounds(80, 310, 60, 40);
-        buttonFive.setFont(new Font("Arial", Font.BOLD, 20));
-        buttonFive.setFocusable(false);
-        frame.add(buttonFive);
-
-        buttonSix.setBounds(150, 310, 60, 40);
-        buttonSix.setFont(new Font("Arial", Font.BOLD, 20));
-        buttonSix.setFocusable(false);
-        frame.add(buttonSix);
-
-        buttonOne.setBounds(10, 370, 60, 40);
-        buttonOne.setFont(new Font("Arial", Font.BOLD, 20));
-        buttonOne.setFocusable(false);
-        frame.add(buttonOne);
-
-        buttonTwo.setBounds(80, 370, 60, 40);
-        buttonTwo.setFont(new Font("Arial", Font.BOLD, 20));
-        buttonTwo.setFocusable(false);
-        frame.add(buttonTwo);
-
-        buttonThree.setBounds(150, 370, 60, 40);
-        buttonThree.setFont(new Font("Arial", Font.BOLD, 20));
-        buttonThree.setFocusable(false);
-        frame.add(buttonThree);
-
-        buttonDot.setBounds(150, 430, 60, 40);
-        buttonDot.setFont(new Font("Arial", Font.BOLD, 20));
-        buttonDot.setFocusable(false);
-        frame.add(buttonDot);
-
-        buttonZero.setBounds(10, 430, 130, 40);
-        buttonZero.setFont(new Font("Arial", Font.BOLD, 20));
-        buttonZero.setFocusable(false);
-        frame.add(buttonZero);
-
-        buttonEqual.setBounds(220, 370, 60, 100);
-        buttonEqual.setFont(new Font("Arial", Font.BOLD, 20));
-        buttonEqual.setBackground(new Color(239, 188, 2));
-        buttonEqual.setFocusable(false);
-        frame.add(buttonEqual);
-
-        buttonDiv.setBounds(220, 110, 60, 40);
-        buttonDiv.setFont(new Font("Arial", Font.BOLD, 20));
-        buttonDiv.setBackground(new Color(239, 188, 2));
-        buttonDiv.setFocusable(false);
-        frame.add(buttonDiv);
-
-        buttonSqrt.setBounds(10, 170, 60, 40);
-        buttonSqrt.setFont(new Font("Arial", Font.BOLD, 18));
-        buttonSqrt.setFocusable(false);
-        frame.add(buttonSqrt);
-
-        buttonMul.setBounds(220, 250, 60, 40);
-        buttonMul.setFont(new Font("Arial", Font.BOLD, 20));
-        buttonMul.setBackground(new Color(239, 188, 2));
-        buttonMul.setFocusable(false);
-        frame.add(buttonMul);
-
-        buttonMinus.setBounds(220, 170, 60, 40);
-        buttonMinus.setFont(new Font("Arial", Font.BOLD, 20));
-        buttonMinus.setBackground(new Color(239, 188, 2));
-        buttonMinus.setFocusable(false);
-        frame.add(buttonMinus);
-
-        buttonPlus.setBounds(220, 310, 60, 50);
-        buttonPlus.setFont(new Font("Arial", Font.BOLD, 20));
-        buttonPlus.setBackground(new Color(239, 188, 2));
-        buttonPlus.setFocusable(false);
-        frame.add(buttonPlus);
-
-        buttonSquare.setBounds(80, 170, 60, 40);
-        buttonSquare.setFont(new Font("Arial", Font.BOLD, 20));
-        buttonSquare.setFocusable(false);
-        frame.add(buttonSquare);
-
-        buttonReciprocal.setBounds(150, 170, 60, 40);
-        buttonReciprocal.setFont(new Font("Arial", Font.BOLD, 15));
-        buttonReciprocal.setFocusable(false);
-        frame.add(buttonReciprocal);
-
-        buttonDelete.setBounds(150, 110, 60, 40);
-        buttonDelete.setFont(new Font("Arial", Font.BOLD, 12));
-        buttonDelete.setBackground(Color.red);
-        buttonDelete.setForeground(Color.white);
-        buttonDelete.setFocusable(false);
-        frame.add(buttonDelete);
-
-        buttonClear.setBounds(80, 110, 60, 40);
-        buttonClear.setFont(new Font("Arial", Font.BOLD, 12));
-        buttonClear.setBackground(Color.red);
-        buttonClear.setForeground(Color.white);
-        buttonClear.setFocusable(false);
-        frame.add(buttonClear);
-    }
-
-    public void addActionEvent() {
-        onRadioButton.addActionListener(this);
-        offRadioButton.addActionListener(this);
-        buttonClear.addActionListener(this);
-        buttonDelete.addActionListener(this);
-        buttonDiv.addActionListener(this);
-        buttonSqrt.addActionListener(this);
-        buttonSquare.addActionListener(this);
-        buttonReciprocal.addActionListener(this);
-        buttonMinus.addActionListener(this);
-        buttonSeven.addActionListener(this);
-        buttonEight.addActionListener(this);
-        buttonNine.addActionListener(this);
-        buttonMul.addActionListener(this);
-        buttonFour.addActionListener(this);
-        buttonFive.addActionListener(this);
-        buttonSix.addActionListener(this);
-        buttonPlus.addActionListener(this);
-        buttonOne.addActionListener(this);
-        buttonTwo.addActionListener(this);
-        buttonThree.addActionListener(this);
-        buttonEqual.addActionListener(this);
-        buttonZero.addActionListener(this);
-        buttonDot.addActionListener(this);
-
-        // Theme settings action listeners
-        darkTheme.addActionListener(this);
-        lightTheme.addActionListener(this);
-    }
-
-    public static void main(String[] args) {
-        new CalculatorApplication();
+        add(panel);
+        setVisible(true);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Object source = e.getSource();
+        for (int i = 0; i < 10; i++) {
+            if (e.getSource() == numberButtons[i]) {
+                display.setText(display.getText() + i);
+                dotUsed = false; // Reset dot usage when a number is pressed
+            }
+        }
 
-        if (source == onRadioButton) {
-            enable();
-        } else if (source == offRadioButton) {
-            disable();
-        } else if (source == buttonClear) {
-            label.setText("");
-            textField.setText("");
-        } else if (source == buttonDelete) {
-            int length = textField.getText().length();
-            int number = length - 1;
-            if (length > 0) {
-                StringBuilder back = new StringBuilder(textField.getText());
-                back.deleteCharAt(number);
-                textField.setText(back.toString());
+        if (e.getSource() == dotButton) {
+            if (!dotUsed) {
+                display.setText(display.getText() + ".");
+                dotUsed = true;
             }
-            if (textField.getText().endsWith("")) ;
-            label.setText("");
-        } else if (source == buttonZero) {
-            if (textField.getText().equals("0")) {
-                return;
-            } else {
-                textField.setText(textField.getText() + "0");
-            }
-        } else if (source == buttonOne) {
-            textField.setText(textField.getText() + "1");
-        } else if (source == buttonTwo) {
-            textField.setText(textField.getText() + "2");
-        } else if (source == buttonThree) {
-            textField.setText(textField.getText() + "3");
-        } else if (source == buttonFour) {
-            textField.setText(textField.getText() + "4");
-        } else if (source == buttonFive) {
-            textField.setText(textField.getText() + "5");
-        } else if (source == buttonSix) {
-            textField.setText(textField.getText() + "6");
-        } else if (source == buttonSeven) {
-            textField.setText(textField.getText() + "7");
-        } else if (source == buttonEight) {
-            textField.setText(textField.getText() + "8");
-        } else if (source == buttonNine) {
-            textField.setText(textField.getText() + "9");
-        } else if (source == buttonDot) {
-            if (textField.getText().contains(".")) {
-                return;
-            } else {
-                textField.setText(textField.getText() + ".");
-            }
-        } else if (source == buttonPlus) {
-            String str = textField.getText();
-            num1 = Double.parseDouble(textField.getText());
-            calculation = 1;
-            textField.setText("");
-            label.setText(str + "+");
-        } else if (source == buttonMinus) {
-            String str = textField.getText();
-            num1 = Double.parseDouble(textField.getText());
-            calculation = 2;
-            textField.setText("");
-            label.setText(str + "-");
-        } else if (source == buttonMul) {
-            String str = textField.getText();
-            num1 = Double.parseDouble(textField.getText());
-            calculation = 3;
-            textField.setText("");
-            label.setText(str + "*");
-        } else if (source == buttonDiv) {
-            String str = textField.getText();
-            num1 = Double.parseDouble(textField.getText());
-            calculation = 4;
-            textField.setText("");
-            label.setText(str + "/");
-        } else if (source == buttonSquare) {
-            num1 = Double.parseDouble(textField.getText());
-            double square = Math.pow(num1, 2);
-            String string = Double.toString(square);
-            if (string.endsWith("0")) {
-                textField.setText(string.replace(".0", ""));
-            } else {
-                textField.setText((string));
-            }
-        } else if (source == buttonSqrt) {
-            num1 = Double.parseDouble(textField.getText());
-            double sqrt = Math.sqrt(num1);
-            textField.setText(Double.toString(sqrt));
-        } else if (source == buttonReciprocal) {
-            num1 = Double.parseDouble(textField.getText());
-            double reciprocal = 1 / num1;
-            String string = Double.toString(reciprocal);
-            if (string.endsWith(".0")) {
-                textField.setText(string.replace(".0", ""));
-            } else {
-                textField.setText(string);
-            }
-        } else if (source == buttonEqual) {
-            num2 = Double.parseDouble(textField.getText());
-            switch (calculation) {
-                case 1:
-                    result = num1 + num2;
-                    break;
-                case 2:
-                    result = num1 - num2;
-                    break;
-                case 3:
-                    result = num1 * num2;
-                    break;
-                case 4:
-                    result = num1 / num2;
-                    break;
+        }
 
+        if (e.getSource() == percentButton) {
+            num1 = Double.parseDouble(display.getText()) / 100;
+            display.setText(String.valueOf(num1));
+        }
+
+        if (e.getSource() == openParenthesisButton) {
+            display.setText(display.getText() + "(");
+        }
+
+        if (e.getSource() == closeParenthesisButton) {
+            display.setText(display.getText() + ")");
+        }
+
+        if (e.getSource() == addButton) {
+            num1 = Double.parseDouble(display.getText());
+            operator = '+';
+            display.setText("");
+            dotUsed = false;
+        }
+        if (e.getSource() == subButton) {
+            num1 = Double.parseDouble(display.getText());
+            operator = '-';
+            display.setText("");
+            dotUsed = false;
+        }
+        if (e.getSource() == mulButton) {
+            num1 = Double.parseDouble(display.getText());
+            operator = '*';
+            display.setText("");
+            dotUsed = false;
+        }
+        if (e.getSource() == divButton) {
+            num1 = Double.parseDouble(display.getText());
+            operator = '/';
+            display.setText("");
+            dotUsed = false;
+        }
+        if (e.getSource() == squareButton) {
+            num1 = Double.parseDouble(display.getText());
+            display.setText(String.valueOf(num1 * num1));
+        }
+        if (e.getSource() == sqrtButton) {
+            num1 = Double.parseDouble(display.getText());
+            display.setText(String.valueOf(Math.sqrt(num1)));
+        }
+        if (e.getSource() == reciprocalButton) {
+            num1 = Double.parseDouble(display.getText());
+            display.setText(String.valueOf(1 / num1));
+        }
+        if (e.getSource() == clearButton) {
+            display.setText("");
+            dotUsed = false;
+        }
+        if (e.getSource() == deleteButton) {
+            String currentText = display.getText();
+            if (currentText.length() > 0) {
+                display.setText(currentText.substring(0, currentText.length() - 1));
+                if (currentText.endsWith(".")) {
+                    dotUsed = false; // Reset dot usage if the last character is a dot
+                }
             }
-            if (Double.toString(result).endsWith(".0")) {
-                textField.setText(Double.toString(result).replace(".0", ""));
-            } else {
-                textField.setText(Double.toString(result));
+        }
+        if (e.getSource() == equalButton) {
+            num2 = Double.parseDouble(display.getText());
+
+            switch (operator) {
+                case '+':
+                    display.setText(String.valueOf(num1 + num2));
+                    break;
+                case '-':
+                    display.setText(String.valueOf(num1 - num2));
+                    break;
+                case '*':
+                    display.setText(String.valueOf(num1 * num2));
+                    break;
+                case '/':
+                    if (num2 != 0) {
+                        display.setText(String.valueOf(num1 / num2));
+                    } else {
+                        display.setText("Error");
+                    }
+                    break;
             }
-            label.setText("");
-            num1 = result;
-        } else if (source == darkTheme) {
-            setTheme(true); // Apply dark theme
-        } else if (source == lightTheme) {
-            setTheme(false); // Apply light theme
         }
     }
 
-    public void enable() {
-        onRadioButton.setEnabled(false);
-        offRadioButton.setEnabled(false);
-        textField.setEnabled(true);
-        label.setEnabled(true);
-        buttonDelete.setEnabled(true);
-        buttonDiv.setEnabled(true);
-        buttonSqrt.setEnabled(true);
-        buttonSquare.setEnabled(true);
-        buttonReciprocal.setEnabled(true);
-        buttonMinus.setEnabled(true);
-        buttonSeven.setEnabled(true);
-        buttonEight.setEnabled(true);
-        buttonNine.setEnabled(true);
-        buttonMul.setEnabled(true);
-        buttonFour.setEnabled(true);
-        buttonFive.setEnabled(true);
-        buttonSix.setEnabled(true);
-        buttonPlus.setEnabled(true);
-        buttonOne.setEnabled(true);
-        buttonTwo.setEnabled(true);
-        buttonThree.setEnabled(true);
-        buttonEqual.setEnabled(true);
-        buttonZero.setEnabled(true);
-        buttonDot.setEnabled(true);
-    }
-
-    public void disable() {
-        onRadioButton.setEnabled(true);
-        offRadioButton.setEnabled(false);
-        textField.setEnabled(false);
-        label.setEnabled(false);
-        label.setText("");
-        textField.setText("");
-        buttonDelete.setEnabled(false);
-        buttonDiv.setEnabled(false);
-        buttonSqrt.setEnabled(false);
-        buttonSquare.setEnabled(false);
-        buttonReciprocal.setEnabled(false);
-        buttonMinus.setEnabled(false);
-        buttonSeven.setEnabled(false);
-        buttonEight.setEnabled(false);
-        buttonNine.setEnabled(false);
-        buttonMul.setEnabled(false);
-        buttonFour.setEnabled(false);
-        buttonFive.setEnabled(false);
-        buttonSix.setEnabled(false);
-        buttonPlus.setEnabled(false);
-        buttonOne.setEnabled(false);
-        buttonTwo.setEnabled(false);
-        buttonThree.setEnabled(false);
-        buttonEqual.setEnabled(false);
-        buttonZero.setEnabled(false);
-        buttonDot.setEnabled(false);
-    }
-
-    // Function to apply the theme
-    public void setTheme(boolean isDark) {
-        if (isDark) {
-            frame.getContentPane().setBackground(darkBackground);
-            label.setForeground(darkForeground);
-            textField.setForeground(darkForeground);
-            onRadioButton.setBackground(darkBackground);
-            onRadioButton.setForeground(darkForeground);
-            offRadioButton.setBackground(darkBackground);
-            offRadioButton.setForeground(darkForeground);
-            darkTheme.setBackground(darkBackground);
-            darkTheme.setForeground(darkForeground);
-            lightTheme.setBackground(darkBackground);
-            lightTheme.setForeground(darkForeground);
-
-            // Update button colors
-            buttonClear.setBackground(Color.blue); // Dark red
-            buttonClear.setForeground(Color.white);
-            buttonDelete.setBackground(Color.blue);
-            buttonDelete.setForeground(Color.white);
-        } else {
-            frame.getContentPane().setBackground(lightBackground);
-            label.setForeground(lightForeground);
-            textField.setForeground(lightForeground);
-            onRadioButton.setBackground(lightBackground);
-            onRadioButton.setForeground(lightForeground);
-            offRadioButton.setBackground(lightBackground);
-            offRadioButton.setForeground(lightForeground);
-            darkTheme.setBackground(lightBackground);
-            darkTheme.setForeground(lightForeground);
-            lightTheme.setBackground(lightBackground);
-            lightTheme.setForeground(lightForeground);
-
-            // Update button colors
-            buttonClear.setBackground(Color.CYAN); // Light gray
-            buttonClear.setForeground(Color.black);
-            buttonDelete.setBackground(Color.CYAN);
-            buttonDelete.setForeground(Color.black);
-        }
-        frame.repaint(); // Refresh the frame to apply the changes
+    public static void main(String[] args) {
+        new BasicCalculatorGUI();
     }
 }
