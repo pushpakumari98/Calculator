@@ -1,6 +1,6 @@
 <h2><b>Basic Calculator GUI</b></h2>
 <p>A graphical calculator built using Java's Swing framework. It supports basic mathematical operations along with advanced features like square, square root, reciprocal, and percentage calculations.</p>
-<h2><b>Features</b></h2>
+<h2><b>Features</b></h2> 
 <ul>
   <li>Addition, Subtraction, Multiplication, Division</li>
   <li>Square, Square Root, and Reciprocal operations</li>
